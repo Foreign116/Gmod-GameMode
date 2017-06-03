@@ -5,8 +5,26 @@ include("shared.lua")
 include("teamsetup.lua")
 util.AddNetworkString("redteamscore")
 util.AddNetworkString("blueteamscore")
-PLAYER = FindMetaTable( "Player" );
+util.AddNetworkString("killstreak")
+util.AddNetworkString("p")
+util.AddNetworkString("neww")
+PLAYER = FindMetaTable( "Player" )
 
+local kd 
+local w
+net.Receive("p",function(len,ply)
+w=net.ReadString()
+end)
+net.Receive("killstreak",function(len,ply)
+kd = net.ReadInt(16)
+if(kd==5) then
+	ply:Give("cmbr_deathmachine")
+elseif(kd==9) then
+	ply:Give("sent_combinemech")
+elseif(kd==15) then
+	ply:Give("weapon_nukestrike")
+end
+end)
 function PLAYER:Unassigned( )
 	if ( self:Team( ) == TEAM_UNASSIGNED || self:Team( ) == TEAM_SPECTATOR ) then
 		return true;
@@ -17,19 +35,19 @@ end
 
 
 function GM:PlayerInitialSpawn( Player )
-	Player:SetTeam( TEAM_SPECTATOR );
+	Player:SetTeam( TEAM_SPECTATOR )
 end
 
 function GM:PlayerSpawn( ply )
 
 	if ( ply:Unassigned( ) ) then
 		ply:StripAmmo( )
-		ply:StripWeapons( );
+		ply:StripWeapons( )
 		ply:Spectate( OBS_MODE_ROAMING )
 		ply:ConCommand("team_menu")
-		return false;
+		return false
 	else
-		ply:SetUpTeam(ply:Team())
+		ply:SetUpTeam(ply:Team(),w)
 		ply:UnSpectate()
 	end
 
@@ -86,24 +104,21 @@ function GM:PlayerCanHearPlayersVoice(listener,speaker)
 end 
 
  function team_1( ply )
- 	ply:SetUpTeam(0)
- 	PLAYER.f1key = false
+ 	ply:SetUpTeam(0,w) 
  	ply:Spawn()
-   	ply:SetUpTeam(0)
+   	ply:SetUpTeam(0,w)
 	ply:SetupHands()
  end 
  
  function team_2( ply )
- 	ply:SetUpTeam(1)
- 	PLAYER.f1key = false
+ 	ply:SetUpTeam(1,w)
 	ply:Spawn()
-	ply:SetUpTeam(1)
+	ply:SetUpTeam(1,w)
 	ply:SetupHands()
  end
 
 
 function GM:PlayerDeath(victim,inflictor,attacker)
-	PLAYER.f1key = false
 	if(attacker:IsPlayer()) then
 		PrintMessage( HUD_PRINTTALK, victim:Nick().." got killed by "..attacker:Nick())
 	else
@@ -133,7 +148,11 @@ net.WriteInt(bscore,16)
 net.Send(players)
 end
 
-	
-	
+function GM:PlayerDeath(vic,inf,att)
+	net.Receive("neww",function(len,ply)
+	w=net.ReadString()
+	end)
+	end
+
 concommand.Add( "team_1", team_1 )
 concommand.Add( "team_2", team_2 )
