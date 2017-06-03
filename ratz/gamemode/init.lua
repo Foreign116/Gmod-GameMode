@@ -5,26 +5,41 @@ include("shared.lua")
 include("teamsetup.lua")
 util.AddNetworkString("redteamscore")
 util.AddNetworkString("blueteamscore")
-util.AddNetworkString("killstreak")
-util.AddNetworkString("p")
-util.AddNetworkString("neww")
+util.AddNetworkString("realredteamscore")
+util.AddNetworkString("realblueteamscore")
 PLAYER = FindMetaTable( "Player" )
+local realr = 0
+local realb = 0
 
-local kd 
-local w
-net.Receive("p",function(len,ply)
-w=net.ReadString()
+net.Receive("realredteamscore",function(len,ply)
+	realr = net.ReadInt(16)
+	if(realr==5) then
+		for k,v in pairs(player.GetAll()) do
+			v:SetTeam( TEAM_SPECTATOR )
+			v:StripAmmo( )
+			v:StripWeapons( )
+			v:KillSilent()
+			v:SetFrags(0)
+			v:SetDeaths(0)
+
+		end
+	end
 end)
-net.Receive("killstreak",function(len,ply)
-kd = net.ReadInt(16)
-if(kd==5) then
-	ply:Give("cmbr_deathmachine")
-elseif(kd==9) then
-	ply:Give("sent_combinemech")
-elseif(kd==15) then
-	ply:Give("weapon_nukestrike")
-end
+net.Receive("realblueteamscore",function(len,ply)
+	realb = net.ReadInt(16)
+	if(realb==5) then
+		for k,v in pairs(player.GetAll()) do
+			v:SetTeam( TEAM_SPECTATOR )
+			v:StripAmmo( )
+			v:StripWeapons( )
+			v:KillSilent()
+			v:SetFrags(0)
+			v:SetDeaths(0)
+
+		end
+	end
 end)
+
 function PLAYER:Unassigned( )
 	if ( self:Team( ) == TEAM_UNASSIGNED || self:Team( ) == TEAM_SPECTATOR ) then
 		return true;
@@ -46,9 +61,12 @@ function GM:PlayerSpawn( ply )
 		ply:Spectate( OBS_MODE_ROAMING )
 		ply:ConCommand("team_menu")
 		return false
+		
 	else
-		ply:SetUpTeam(ply:Team(),w)
+		ply:SetUpTeam(ply:Team())
+		ply:SetJumpPower(1100)
 		ply:UnSpectate()
+		ply:SetJumpPower(1100)
 	end
 
 end
@@ -104,17 +122,21 @@ function GM:PlayerCanHearPlayersVoice(listener,speaker)
 end 
 
  function team_1( ply )
- 	ply:SetUpTeam(0,w) 
+ 	ply:SetUpTeam(0) 
  	ply:Spawn()
-   	ply:SetUpTeam(0,w)
+ 	ply:SetJumpPower(1100)
+   	ply:SetUpTeam(0)
 	ply:SetupHands()
+	ply:SetJumpPower(1100)
  end 
  
  function team_2( ply )
- 	ply:SetUpTeam(1,w)
+ 	ply:SetUpTeam(1)
 	ply:Spawn()
-	ply:SetUpTeam(1,w)
+	ply:SetJumpPower(1100)
+	ply:SetUpTeam(1)
 	ply:SetupHands()
+	ply:SetJumpPower(1100)
  end
 
 
@@ -146,13 +168,11 @@ net.Send(players)
 net.Start("blueteamscore")
 net.WriteInt(bscore,16)
 net.Send(players)
+if(bscore==50 or rscore==50) then
+	bscore = 0
+	rscore = 0
 end
-
-function GM:PlayerDeath(vic,inf,att)
-	net.Receive("neww",function(len,ply)
-	w=net.ReadString()
-	end)
-	end
+end
 
 concommand.Add( "team_1", team_1 )
 concommand.Add( "team_2", team_2 )

@@ -1,4 +1,4 @@
-GM.Name = "My Gamemode"
+GM.Name = "Ratz Clone"
 GM.Author = "Mehmet Ozdemir"
 GM.Email = "mcozdemi@buffalo.edu"
 GM.Website = "www.github.com/Foreign116"

@@ -1,7 +1,7 @@
-"My Gamemode"
+"Gamemode"
 {
 	"base"		"base"
-	"title"		"My Gamemode"
+	"title"		"Ratz Clone"
 	"maps"		"^gm_"
 	"menusystem"	"1"
 	"workshopid"	""
